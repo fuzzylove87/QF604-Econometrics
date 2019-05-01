@@ -11,7 +11,7 @@ from statsmodels.stats import stattools as st
 
 
 Metric = np.array(('ROA', 'ROIC', 'ROCE', 'Gross Margin', 'Profit Margin', 
-                  'EBITDA Margin', 'Op CF Margin', 'Curr Ratio', 'D E Ratio',
+                  'EBITDA Margin', 'Op CF Margin', 'Curr Ratio', 
                   'LTDE Ratio', 'Market Cap', 'BV Equity', 'Revenue', 'Cash Dividends',
                   'Net Cash Flow', 'Employees'))
 Company = np.array(('AMERICAN ELECTRIC POWER CO', 'NORAM ENERGY CORP', 'CENTERIOR ENERGY CORP',
@@ -33,7 +33,6 @@ for a in range(Metric.shape[0]):
         DF.iloc[k-1, a] = st.durbin_watson(Data.iloc[:, k].dropna())
 
 DF.to_excel('DW.xlsx', index = True, header=True)
-
 
 
 

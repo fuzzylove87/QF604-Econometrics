@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 Metric = np.array(('ROA', 'ROIC', 'ROCE', 'Gross Margin', 'Profit Margin', 
-                  'EBITDA Margin', 'Op CF Margin', 'Curr Ratio', 'D E Ratio',
+                  'EBITDA Margin', 'Op CF Margin', 'Curr Ratio',
                   'LTDE Ratio', 'Market Cap', 'BV Equity', 'Revenue', 'Cash Dividends',
                   'Net Cash Flow', 'Employees'))
 Company = np.array(('AMERICAN ELECTRIC POWER CO', 'NORAM ENERGY CORP', 'CENTERIOR ENERGY CORP',
@@ -22,17 +22,40 @@ Company = np.array(('AMERICAN ELECTRIC POWER CO', 'NORAM ENERGY CORP', 'CENTERIO
                     'ENERGY FUTURE HOLDINGS CORP', 'WILLIAMS COS INC', 'CLEVELAND ELECTRIC ILLUM',
                     'AES CORP', 'AMERICAN WATER WORKS CO INC'))
 
-DF = np.zeros((len(Company), len(Metric)))
-DF = pd.DataFrame(DF, index=Company, columns=Metric)
-
+# Autocorrelation
+ACF = np.zeros((len(Company), len(Metric)))
+ACF = pd.DataFrame(ACF, index=Company, columns=Metric)
 
 for a in range(Metric.shape[0]):
     Data = pd.read_excel('Fundamentals.xlsx', sheet_name= Metric[a])
     for k in range(1, Data.shape[1]):
-        DF.iloc[k-1, a] = np.corrcoef(Data.iloc[:, k].dropna()[:-1], Data.iloc[:, k].dropna()[1:])[0, 1]
+        ACF.iloc[k-1, a] = np.corrcoef(Data.iloc[:, k].dropna()[:-1], Data.iloc[:, k].dropna()[1:])[0, 1]
 
 
-DF.to_excel('ACF.xlsx', index = True, header=True)
+ACF.to_excel('ACF.xlsx', index = True, header=True)
+
+# Count number of elements
+Count = np.zeros((len(Company), len(Metric)))
+Count = pd.DataFrame(Count, index=Company, columns=Metric)
+
+for a in range(Metric.shape[0]):
+    Data = pd.read_excel('Fundamentals.xlsx', sheet_name= Metric[a])
+    for k in range(1, Data.shape[1]):
+        Count.iloc[k-1, a] = Data.iloc[:, k].count()
+
+
+# T-stat of Autocorrelation
+Tstat = np.zeros((len(Company), len(Metric)))
+Tstat = pd.DataFrame(Tstat, index=Company, columns=Metric)
+
+for a in range(ACF.shape[0]):
+    for k in range(ACF.shape[1]):
+        if np.isnan(ACF.iloc[a, k]) is True:
+            Tstat.iloc[a, k] = np.nan
+        else:
+            Tstat.iloc[a, k] = ACF.iloc[a, k] * np.sqrt((Count.iloc[a, k]-2)/(1-ACF.iloc[a, k]**2))
+         
+Tstat.to_excel('Tstat.xlsx', index = True, header=True)            
 
 
 
